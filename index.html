@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<title>Infinite Scroll</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+</head>
+<body class="p-3 is-flex is-flex-direction-column">
+	<div id="content">
+		<div id="sentinel"></div>
+	</div>
+
+	<script type="module">
+    import { faker } from "https://unpkg.com/@faker-js/faker@8.4.1/dist/esm/index.mjs";
+
+		const content = document.getElementById("content");
+		const sentinel = document.getElementById("sentinel");
+
+		const options = {
+			root: null,
+			rootMargin: "0px",
+			threshold: 0.8,
+		};
+
+		const observer = new IntersectionObserver(handleIntersection, options);
+		observer.observe(sentinel);
+
+		function handleIntersection(entries, observer) {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					setTimeout(loadMoreItems, 500);
+				}
+			});
+		}
+
+		function loadMoreItems() {
+			content.removeChild(sentinel);
+
+			const fragment = createFragment();
+      content.append(fragment);
+		}
+
+		function createFragment() {
+      const fragment = document.createDocumentFragment();
+
+      Array.from({ length: 10 }).forEach(() => {
+        const img = document.createElement("img");
+        img.src = faker.image.avatar();
+
+        const figure = document.createElement("figure");
+        figure.classList.add("image");
+        figure.classList.add("is-48x48");
+        figure.appendChild(img);
+
+        const divMediaLeft = document.createElement("div");
+        divMediaLeft.classList.add("media-left");
+        divMediaLeft.appendChild(figure);
+
+        const pTitle = document.createElement("p");
+        pTitle.classList.add("title");
+        pTitle.classList.add("is-4");
+        pTitle.innerText = faker.person.fullName();
+
+        const pSubtitle = document.createElement("p");
+        pSubtitle.classList.add("has-text-link");
+        pSubtitle.classList.add("subtitle");
+        pSubtitle.classList.add("is-7");
+        pSubtitle.innerText = faker.internet.email();
+
+        const divMediaContent = document.createElement("div");
+        divMediaContent.classList.add("media-content");
+        divMediaContent.appendChild(pTitle);
+        divMediaContent.appendChild(pSubtitle);
+
+        const divMedia = document.createElement("div");
+        divMedia.classList.add("media");
+        divMedia.appendChild(divMediaLeft);
+        divMedia.appendChild(divMediaContent);
+
+        const br = document.createElement("br");
+        const smallCity = document.createElement("small");
+        smallCity.classList.add("has-text-warning");
+        smallCity.innerText = faker.location.city();
+
+        const divContent = document.createElement("div");
+        divContent.classList.add("content");
+        divContent.innerText = faker.lorem.paragraph(5);
+        divContent.appendChild(br);
+        divContent.appendChild(smallCity);
+
+        const divCardContent = document.createElement("div");
+        divCardContent.classList.add("card-content");
+        divCardContent.appendChild(divMedia);
+        divCardContent.appendChild(divContent);
+
+        const divCard = document.createElement("div");
+        divCard.classList.add("card");
+        divCard.appendChild(divCardContent);
+
+        fragment.append(divCard);
+      });
+
+      fragment.insertBefore(sentinel, fragment.children[fragment.children.length - 5]);
+      return fragment;
+		}
+	</script>
+</body>
+</html>
